@@ -1,0 +1,42 @@
+Install-Module Microsoft.Graph -Force
+Connect-MgGraph -Scopes "User.Read.All", "Group.ReadWrite.All", "GroupMember.ReadWrite.All", "Directory.ReadWrite.All"
+
+
+
+# Import the CSV file
+$users = Import-Csv -Path "D:\user.csv"
+
+# Create a password profile
+$PasswordProfile = @{
+    Password = 'Password123'
+ forceChangePasswordNextSignIn = $true
+    }
+
+# Loop through each user in the CSV file
+foreach ($user in $users) {
+    # Create a new user
+    $newUser = New-MgUser -DisplayName $user.DisplayName -GivenName $user.FirstName -Surname $user.LastName -UserPrincipalName $user.UserPrincipalName -UsageLocation $user.UsageLocation  -MailNickname $user.MailNickname -Department $user.Department -JobTitle $user.JobTitle -PasswordProfile $passwordProfile -AccountEnabled
+
+# Assign a license to the new user
+    $e5Sku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq 'DEVELOPERPACK_E5'
+    Set-MgUserLicense -UserId $newUser.Id -AddLicenses @{SkuId = 'c42b9cae-ea4f-4ab7-9717-81576235ccac'} -RemoveLicenses @()
+}
+
+# Export the results to a CSV file
+$users | Export-Csv -Path "D:\newuser.csv" -NoTypeInformation
+
+
+
+$users = Import-Csv -Path "D:\user.csv"
+
+$PasswordProfile = @{
+    Password = 'Pa55w.rd'
+ forceChangePasswordNextSignIn = $true
+    }
+
+foreach ($user in $users) {
+    $newUser = New-MgUser -DisplayName $user.DisplayName -GivenName $user.FirstName -Surname $user.LastName -UserPrincipalName $user.UserPrincipalName -UsageLocation $user.UsageLocation  -MailNickname $user.MailNickname -Department $user.Department -JobTitle $user.JobTitle -PasswordProfile $passwordProfile -AccountEnabled
+
+    $e5Sku = Get-MgSubscribedSku -All | Where SkuPartNumber -eq 'DEVELOPERPACK_E5'
+    Set-MgUserLicense -UserId $newUser.Id -AddLicenses @{SkuId = 'c42b9cae-ea4f-4ab7-9717-81576235ccac'} -RemoveLicenses @()
+}
